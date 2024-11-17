@@ -1,0 +1,49 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container">
+        <table class="table table-hover">
+            <thead>
+                <th>글번호</th>
+                <th>작성자</th>
+                <th>제목</th>
+                <th>조회수</th>
+            </thead>
+            <tbody>
+                <tr th:each="list, stat :${list}" th:attr="data-pagenum=${list.boardId}, id='boardRow'">
+                    <td>[[${list.boardId}]]</td>
+                    <td>[[${list.name}]]</td>
+                    <td>[[${list.title}]]</td>
+                    <td>[[${list.counts}]]</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
+
+<script>
+
+    window.addEventListener("DOMContentLoaded", () => {
+        const rowDoms = document.querySelectorAll("#boardRow");
+
+        for (const row of rowDoms) {
+            row.addEventListener('click', () => {
+                const pagenum = (row.dataset.pagenum * 1);
+                location.href = `/board/${pagenum}`;
+            })
+        }
+    })
+</script>
+
+<style>
+    tr {
+        cursor: pointer;
+    }
+</style>

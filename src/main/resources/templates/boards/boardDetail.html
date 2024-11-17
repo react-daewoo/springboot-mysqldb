@@ -1,0 +1,178 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+<body>
+<div class="container">
+    <div class="table">
+        <ul class="details">
+            <li>
+                <label for="">글번호</label>
+                <span th:text="${board.boardId}"></span>
+            </li>
+            <li>
+                <label for="">제목</label>
+                <span class="detail-info" th:text="${board.title}"></span>
+                <input type="text" class="detail-modify" id="title">
+            </li>
+            <li>
+                <label for="">내용</label>
+                <span class="detail-info" th:text="${board.content}"></span>
+                <input type="text" class="detail-modify" id="content">
+            </li>
+            <li>
+                <label for="">조회수</label>
+                <span th:text="${board.counts}"></span>
+            </li>
+        </ul>
+    </div>
+
+    <div class="buttons">
+        <button id="backbtn">뒤로가기</button>
+        <button id="updatebtn" th:attr="data-bno=${board.boardId}">수정하기</button>
+        <button class="updatedonebtn">수정완료</button>
+        <button id="deletebtn">삭제하기</button>
+    </div>
+</div>
+</body>
+</html>
+<script>
+    const api = async (url, method, param, responseCallback) => {
+        return fetch(url, {
+            method: method,
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify(param)
+        })
+        .then(response => {
+            console.log('finish');
+            if (response.ok) {
+                console.log('.... ', responseCallback);
+
+                if (responseCallback) {
+                    responseCallback();
+                }
+
+                return response;
+            } else {
+                return Promise.reject("error");
+            }
+        })
+        .then(data => {
+            return Promise.resolve("Successfully");
+        })
+    };
+
+    const updateCounts = async (bno) => {
+        await api("/board/updateCounts/" + bno, "PUT");
+    }
+
+
+    window.addEventListener("DOMContentLoaded", () => {
+
+        const test = () => {
+            console.log('test...!!');
+        }
+
+        const backbtn = document.querySelector("#backbtn");
+        const updatebtn = document.querySelector("#updatebtn");
+        const deletebtn = document.querySelector("#deletebtn");
+        const updatedonebtn = document.querySelector(".updatedonebtn");
+
+        const details = document.querySelector(".details");
+
+        const bno = updatebtn.dataset.bno;
+        updateCounts(bno);
+
+        backbtn.addEventListener("click", () => {
+            window.location = "/board/page/1";
+        })
+
+        updatebtn.addEventListener("click", () => {
+            // location.href = "/board/update/" + bno;
+            details.classList.add("modifymode");
+            updatedonebtn.style.display = 'inline-block';
+        })
+
+        deletebtn.addEventListener("click", async () => {
+            const delyn = confirm("정말 삭제하시겠습니까?");
+
+            if (delyn) {
+                alert("삭제되었습니다");
+                const callback = () => {
+                    window.location = "/board/page/1";
+                }
+                const res = await api(`/board/${bno}`, "DELETE", '');
+                test();
+            }
+        });
+
+        updatedonebtn.addEventListener('click', async () => {
+            let param = {};
+
+            param['title'] = document.querySelector("#title").value;
+            param['boardId'] = bno;
+            param['content'] = document.querySelector("#content").value;
+
+            const callback = () => {
+                window.location = "/board/page/1";
+            }
+
+            await api(`/board/${bno}`, "PUT", param, callback);
+        })
+    })
+</script>
+
+<style>
+    tr {
+        cursor: pointer;
+    }
+    ul li {
+        text-decoration: none;
+        list-style: none;
+        margin-top:10px;
+    }
+    .table {
+        display: flex;
+        align-content: center;
+        align-items: center;
+        padding: 10px;
+        border: 1px solid black;
+        border-radius: 10px;
+    }
+    .table label {
+        width: 120px;
+        background-color: aquamarine;
+    }
+
+    .modifymode .details {
+        display: none;
+    }
+    .modifymode .detail-info {
+        display:none;
+    }
+
+    .detail-info {
+        display:inline-block;
+    }
+
+    .modifymode > .detail-info {
+        display:none;
+    }
+    .detail-modify {
+        display: none;
+    }
+    .modifymode .detail-modify {
+        display:inline-block;
+    }
+    .updatedonebtn {
+        display:none;
+    }
+
+
+</style>
